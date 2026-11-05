@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "testar-abstraction"
+version = "0.3.0"
+description = "Native Python interpretation of TESTAR abstraction rules"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+dependencies = []
+
+[project.urls]
+Repository = "https://github.com/ferpasri/testar-abstraction-python"
+Specifications = "https://github.com/ferpasri/testar-abstraction-specs"
+
+[tool.setuptools.packages.find]
+where = ["src"]
