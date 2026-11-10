@@ -18,6 +18,8 @@ The `evidence` object contains these collections:
 
 Collections use arrays of records. Python also accepts dictionaries indexed by record identity. The shared conformance input uses this same collection structure. An original JSONL trace must first be read by its evidence library; it is different from this reconstructed input.
 
+When reading reconstructed JSON, use `json.loads(text, parse_float=Decimal)` with `Decimal` from Python's `decimal` module. Integers remain exact, and decimal digits are preserved before comparison. For example, `1` and `1.00` match, while `0.10000000000000000001` and `0.10000000000000000002` remain different. The file example also writes these values as JSON numbers without converting them to strings.
+
 ## Group observations
 
 Rules select state properties, widget properties, filtering, hierarchy, order, and string normalization. The preview contains the applied `definition`, `policyFingerprint`, `interpreterVersion`, `inputScope`, `groups`, and `unmatched` observations.

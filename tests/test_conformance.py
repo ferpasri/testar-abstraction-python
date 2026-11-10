@@ -1,5 +1,6 @@
 import copy
 import json
+from decimal import Decimal
 import unittest
 from testar_abstraction import preview_abstraction, build_abstract_model
 from support import prepared, normalize, semantic_result
@@ -12,9 +13,9 @@ class SharedConformanceTests(unittest.TestCase):
             for name in entry["cases"]:
                 with self.subTest(suite=suite, case=name):
                     directory = root / entry["directory"] / name
-                    data = json.loads((directory / "input.json").read_text(encoding="utf-8"))
+                    data = json.loads((directory / "input.json").read_text(encoding="utf-8"), parse_float=Decimal)
                     definition = (directory / "rules.json").read_text(encoding="utf-8")
-                    expected = normalize(json.loads((directory / "expected.json").read_text(encoding="utf-8")))
+                    expected = normalize(json.loads((directory / "expected.json").read_text(encoding="utf-8"), parse_float=Decimal))
                     original = copy.deepcopy(data)
                     for reverse in (False, True):
                         if reverse:

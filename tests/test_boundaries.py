@@ -1,5 +1,6 @@
 import copy
 import json
+from decimal import Decimal
 import unittest
 from testar_abstraction import (
     AbstractionError, AbstractionLimitError, parse_abstraction_rules,
@@ -75,6 +76,41 @@ class BoundaryTests(unittest.TestCase):
         self.assertNotEqual(canonical("1"), canonical(1))
         self.assertNotEqual(canonical(1234567890123456789012345678901),
                             canonical(1234567890123456789012345678902))
+
+    def test_json_reading_keeps_distinct_captured_values_separate(self):
+        # Two captured measurements differ beyond ordinary floating-point precision.
+        values = json.loads(
+            '[1, 1.00, 18446744073709551615, 1.8446744073709551615e19, '
+            '0.10000000000000000001, 0.10000000000000000002]',
+            parse_float=Decimal)
+        self.assertEqual(canonical(values[0]), canonical(values[1]))
+        self.assertEqual(canonical(values[2]), canonical(values[3]))
+        self.assertNotEqual(canonical(values[4]), canonical(values[5]))
+        self.assertEqual(json.loads(canonical(values), parse_float=Decimal), values)
+
+        # Numeric widget exclusions must retain the same precision as captured properties.
+        definition = {
+            "version": 1, "name": "Precise exclusion",
+            "state": [{"name": "page", "keys": ["page"]}], "capture": "same",
+            "widgets": {
+                "fields": [{"name": "value", "keys": ["value"]}],
+                "hierarchy": "flat", "order": "sort", "descendants": "keep",
+                "exclude": [{"keys": ["value"], "op": "equals", "value": values[4]}],
+            },
+        }
+        rules = parse_abstraction_rules(canonical(definition))
+        self.assertEqual(rules["widgets"]["exclude"][0]["value"], values[4])
+        observation = {"recorded_state": {
+            "properties": {"page": "measurements"}, "capture": "complete",
+            "widgets": [
+                {"id": "excluded", "parent": None, "properties": {"value": values[4]}},
+                {"id": "retained", "parent": None, "properties": {"value": values[5]}},
+            ],
+        }}
+        _, widgets, _ = project_observation(
+            observation, {"source": "source", "run": "run", "observation": "observation"},
+            rules, Budget())
+        self.assertEqual([item["reference"]["widget"] for item in widgets], ["retained"])
 
     def test_hierarchy_cycles_stay_unmatched(self):
         observation = self.input["sources"][0]["evidence"]["observations"][0]

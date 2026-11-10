@@ -2,6 +2,7 @@
 
 from copy import deepcopy
 import json
+from decimal import Decimal
 from .common import AbstractionError, canonical
 
 
@@ -74,7 +75,7 @@ def parse_abstraction_rules(definition):
     encoded = definition if isinstance(definition, str) else canonical(definition)
     require(len(encoded.encode("utf-8")) <= 65536, "Rules exceed 64 KiB")
     try:
-        rule = json.loads(encoded)
+        rule = json.loads(encoded, parse_float=Decimal)
     except ValueError as error:
         raise AbstractionError("Rules must be valid JSON") from error
     structure(rule, ["version", "name", "state", "capture"], ["widgets", "actions"])

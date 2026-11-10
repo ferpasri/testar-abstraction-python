@@ -3,6 +3,7 @@
 import hashlib
 import json
 from pathlib import Path
+from testar_abstraction.common import canonical
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -28,7 +29,7 @@ def prepared():
 
 def normalize(value):
     if isinstance(value, list):
-        return sorted((normalize(item) for item in value), key=lambda item: json.dumps(item, sort_keys=True))
+        return sorted((normalize(item) for item in value), key=canonical)
     if isinstance(value, dict):
         return {key: normalize(item) for key, item in value.items()}
     return value
